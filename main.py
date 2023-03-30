@@ -15,10 +15,17 @@ class MyGame(arcade.Window):
 
         arcade.set_background_color(arcade.color.BLACK)
 
-        self.buttonarray = []
+        self.menubuttonarray = []
 
-        self.buttonarray.append(mainmenu.BaseButtonEntity(50, 300, "play", "BUTTON_START_GAME"))
-        self.buttonarray.append(mainmenu.BaseButtonEntity(50, 265, "quit", "BUTTON_QUIT_GAME"))
+        self.menubuttonarray.append(mainmenu.BaseButtonEntity(50, 300, "play", "BUTTON_START_GAME"))
+        self.menubuttonarray.append(mainmenu.BaseButtonEntity(50, 265, "quit", "BUTTON_QUIT_GAME"))
+
+        self.pausebuttonarray = []
+
+        self.pausebuttonarray.append(mainmenu.BaseButtonEntity(500, 300, "resume", "BUTTON_RESUME_GAME"))
+        self.pausebuttonarray.append(mainmenu.BaseButtonEntity(500, 265, "quit", "BUTTON_QUIT_GAME"))
+
+        self.pausebg = mainmenu.PauseBG(500, 275, 150, 75)
 
         self.ply = player.PlayerEntity(100,250)
         self.mouse_x = 100
@@ -133,19 +140,19 @@ class MyGame(arcade.Window):
             for e in self.menuenemyarray:
                 e.draw()
 
-            for b in self.buttonarray:
+            for b in self.menubuttonarray:
                 b.draw()
 
             #title text here
-            arcade.draw_text("INSERT TITLE HERE",
-                             50,
+            arcade.draw_text("PLACEHOLDER TITLE",
+                             35,
                              350,
                              arcade.color.WHITE,
                              50,
                              1000,
                              align="left")
 
-        if self.gamestate == "playing" or self.gamestate == "lose":
+        if self.gamestate == "playing" or self.gamestate == "lose" or self.gamestate == "pause":
 
             for s in self.stararray:
                 s.draw()
@@ -158,7 +165,7 @@ class MyGame(arcade.Window):
             for e in self.enemyarray:
                 e.draw()
 
-            if self.gamestate == "playing":
+            if self.gamestate == "playing" or self.gamestate == "pause":
                 arcade.draw_text(str(self.ply.score),
                                  10,
                                  460,
@@ -199,6 +206,11 @@ class MyGame(arcade.Window):
                                  15,
                                  1000,
                                  align="center")
+
+            if self.gamestate == "pause":
+                self.pausebg.draw()
+                for b in self.pausebuttonarray:
+                    b.draw()
 
     def on_update(self, delta_time):
 
@@ -311,8 +323,13 @@ class MyGame(arcade.Window):
                 self.showfps = False
 
         if key == arcade.key.ESCAPE:
-            self.retry()
-            self.gamestate = "menu"
+            if self.gamestate == "pause":
+                self.gamestate = "playing"
+            elif self.gamestate == "playing":
+                self.gamestate = "pause"
+            elif self.gamestate == "lose":
+                self.retry()
+                self.gamestate = "menu"
 
     def on_key_release(self, key, key_modifiers):
         pass
@@ -325,11 +342,21 @@ class MyGame(arcade.Window):
         if self.gamestate == "playing":
             self.shooting = True
         if self.gamestate == "menu":
-            for b in self.buttonarray:
+            for b in self.menubuttonarray:
                 if b.center_x - mainmenu.BUTTON_LENGTH / 2 < x < b.center_x + mainmenu.BUTTON_LENGTH / 2 and \
                     b.center_y - mainmenu.BUTTON_WIDTH / 2 < y < b.center_y + mainmenu.BUTTON_WIDTH / 2:
 
                     if b.id == "BUTTON_START_GAME":
+                        self.gamestate = "playing"
+
+                    if b.id == "BUTTON_QUIT_GAME":
+                        arcade.exit()
+        if self.gamestate == "pause":
+            for b in self.pausebuttonarray:
+                if b.center_x - mainmenu.BUTTON_LENGTH / 2 < x < b.center_x + mainmenu.BUTTON_LENGTH / 2 and \
+                    b.center_y - mainmenu.BUTTON_WIDTH / 2 < y < b.center_y + mainmenu.BUTTON_WIDTH / 2:
+
+                    if b.id == "BUTTON_RESUME_GAME":
                         self.gamestate = "playing"
 
                     if b.id == "BUTTON_QUIT_GAME":
