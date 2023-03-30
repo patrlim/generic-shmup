@@ -15,13 +15,18 @@ class MyGame(arcade.Window):
 
         arcade.set_background_color(arcade.color.BLACK)
 
+        self.buttonarray = []
+
+        self.buttonarray.append(mainmenu.BaseButtonEntity(50, 300, "play", "BUTTON_START_GAME"))
+        self.buttonarray.append(mainmenu.BaseButtonEntity(50, 265, "quit", "BUTTON_QUIT_GAME"))
+
         self.ply = player.PlayerEntity(100,250)
         self.mouse_x = 100
         self.mouse_y = 250
 
         self.showfps = False
 
-        self.gamestate = "playing"
+        self.gamestate = "menu"
         self.time = 0
         self.deltatime = 0
 
@@ -32,9 +37,14 @@ class MyGame(arcade.Window):
         self.bulletarray = []
         self.enemyarray = []
         self.stararray = []
+        self.menuenemyarray = []
+        self.menustararray = []
         self.ply.godmode = False
 
         self.enemyselector = 0
+
+        for i in range(128):
+            self.menustararray.append(star.StarEntity(random.randint(0, 1000)))
 
         for i in range(64):
             self.stararray.append(star.StarEntity(random.randint(0, 1000)))
@@ -62,6 +72,8 @@ class MyGame(arcade.Window):
         self.stararray = []
         self.ply.godmode = False
 
+        self.menuenemyang = 0
+
         self.enemyselector = 0
 
         for i in range(64):
@@ -81,7 +93,62 @@ class MyGame(arcade.Window):
     def on_draw(self):
         self.clear()
 
+        if self.showfps:
+            arcade.draw_text("fps: "+str(round(1 / self.deltatime)),
+                             890,
+                             480,
+                             arcade.color.RED,
+                             10,
+                             100,
+                             align="right")
+
+            arcade.draw_text("enemies: "+str(len(self.enemyarray)),
+                             890,
+                             455,
+                             arcade.color.RED,
+                             10,
+                             100,
+                             align="right")
+
+            arcade.draw_text("bullets: "+str(len(self.bulletarray)),
+                             890,
+                             430,
+                             arcade.color.RED,
+                             10,
+                             100,
+                             align="right")
+            arcade.draw_text("stars: "+str(len(self.stararray)),
+                             890,
+                             405,
+                             arcade.color.RED,
+                             10,
+                             100,
+                             align="right")
+
+        if self.gamestate == "menu":
+
+            for s in self.menustararray:
+                s.draw()
+
+            for e in self.menuenemyarray:
+                e.draw()
+
+            for b in self.buttonarray:
+                b.draw()
+
+            #title text here
+            arcade.draw_text("INSERT TITLE HERE",
+                             50,
+                             350,
+                             arcade.color.WHITE,
+                             50,
+                             1000,
+                             align="left")
+
         if self.gamestate == "playing" or self.gamestate == "lose":
+
+            for s in self.stararray:
+                s.draw()
 
             self.ply.draw()
 
@@ -90,34 +157,6 @@ class MyGame(arcade.Window):
 
             for e in self.enemyarray:
                 e.draw()
-
-            for s in self.stararray:
-                s.draw()
-
-            if self.showfps:
-                arcade.draw_text(str(round(1/self.deltatime)),
-                                 890,
-                                 480,
-                                 arcade.color.RED,
-                                 10,
-                                 100,
-                                 align="right")
-
-                arcade.draw_text(str(len(self.enemyarray)),
-                                 890,
-                                 455,
-                                 arcade.color.RED,
-                                 10,
-                                 100,
-                                 align="right")
-
-                arcade.draw_text(str(len(self.bulletarray)),
-                                 890,
-                                 430,
-                                 arcade.color.RED,
-                                 10,
-                                 100,
-                                 align="right")
 
             if self.gamestate == "playing":
                 arcade.draw_text(str(self.ply.score),
@@ -144,7 +183,8 @@ class MyGame(arcade.Window):
                                  15,
                                  1000,
                                  align="center")
-                arcade.draw_text("score: " + str(self.ply.score),
+
+                arcade.draw_text("escape to go to main menu",
                                  0,
                                  200,
                                  arcade.color.RED,
@@ -152,7 +192,36 @@ class MyGame(arcade.Window):
                                  1000,
                                  align="center")
 
+                arcade.draw_text("score: " + str(self.ply.score),
+                                 0,
+                                 175,
+                                 arcade.color.RED,
+                                 15,
+                                 1000,
+                                 align="center")
+
     def on_update(self, delta_time):
+
+        self.time += delta_time
+        self.deltatime = delta_time
+
+        if self.gamestate == "menu":
+
+            if 0 < self.time*1000 % random.randint(1,2) < 1:
+                self.menustararray.append(star.StarEntity(1100))
+
+            for s in self.menustararray:
+                s.update(0, 0)
+                if s.center_x < -100 or s.center_x > 1100 or s.center_y > 600 or s.center_y < -100:
+                    self.menustararray.remove(s)
+
+            if 0 < self.time*100 % random.randint(1,500) < 1 and random.randint(1,10) > 7:
+                for i in range(3):
+                    self.menuenemyang = random.uniform(-60,60)
+                    self.menuenemyarray.append(enemies.DummyEnemy(random.randint(200, 600), random.randint(-90, -20), self.menuenemyang, 3, 0)) #x, y, ang, col, speed, turnspeed
+
+            for e in self.menuenemyarray:
+                e.update()
 
         if self.gamestate == "playing" or self.gamestate == "lose":
 
@@ -161,9 +230,6 @@ class MyGame(arcade.Window):
 
             if self.gamestate == "lose":
                 self.shooting = False
-
-            self.time += delta_time
-            self.deltatime = delta_time
 
             if self.shooting and self.canshoot and self.time > self.shoottime:
                 self.bulletarray.append(bullet.BulletEntity(self.ply.center_x, self.ply.center_y, 25, 0, True, 1))
@@ -176,7 +242,7 @@ class MyGame(arcade.Window):
                     if self.ply.health < 0:
                         self.ply.health = 0
                     self.bulletarray.remove(b)
-                if b.center_x > 1100 or b.center_x < -100:
+                if b.center_x > 1100 or b.center_x < -100 or b.center_y > 600 or b.center_y < -100:
                     self.bulletarray.remove(b)
 
             for e in self.enemyarray:
@@ -214,9 +280,10 @@ class MyGame(arcade.Window):
 
 
             for s in self.stararray:
-                if s.center_x < -100:
-                    self.stararray.remove(s)
                 s.update(self.ply.change_x, self.ply.change_y)
+                if s.center_x < -100 or s.center_x > 1100 or s.center_y > 600 or s.center_y < -100 or s.change_x < 0:
+                    self.stararray.remove(s)
+
 
             if 0 < self.time*1000 % random.randint(1,2) < 1:
                 self.stararray.append(star.StarEntity(1100))
@@ -243,6 +310,10 @@ class MyGame(arcade.Window):
             else:
                 self.showfps = False
 
+        if key == arcade.key.ESCAPE:
+            self.retry()
+            self.gamestate = "menu"
+
     def on_key_release(self, key, key_modifiers):
         pass
 
@@ -253,6 +324,16 @@ class MyGame(arcade.Window):
     def on_mouse_press(self, x, y, button, key_modifiers):
         if self.gamestate == "playing":
             self.shooting = True
+        if self.gamestate == "menu":
+            for b in self.buttonarray:
+                if b.center_x - mainmenu.BUTTON_LENGTH / 2 < x < b.center_x + mainmenu.BUTTON_LENGTH / 2 and \
+                    b.center_y - mainmenu.BUTTON_WIDTH / 2 < y < b.center_y + mainmenu.BUTTON_WIDTH / 2:
+
+                    if b.id == "BUTTON_START_GAME":
+                        self.gamestate = "playing"
+
+                    if b.id == "BUTTON_QUIT_GAME":
+                        arcade.exit()
 
     def on_mouse_release(self, x, y, button, key_modifiers):
         self.shooting = False

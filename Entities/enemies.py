@@ -1,5 +1,6 @@
 import random
 import arcade
+import math
 from Tools import patlib
 
 ENEMY_WIDTH = 25
@@ -52,6 +53,43 @@ class BaseEnemyEntity:
                          100,
                          align="center")
 
+class DummyEnemy(BaseEnemyEntity):
+
+    def __init__(self, x, y, ang, speed, turnspeed):
+        self.center_x = x
+        self.center_y = y
+        self.change_x = 0
+        self.change_y = 0
+        self.ang = ang
+        self.speed = speed
+        self.change_angle = turnspeed
+
+    def update(self):
+        # Convert angle in degrees to radians.
+        angle_rad = math.radians(self.ang)
+
+        # Use math to find our change based on our speed and angle
+        self.center_x += self.speed * math.sin(angle_rad)
+        self.center_y += self.speed * math.cos(angle_rad)
+
+        # Rotate the ship
+        self.ang += self.change_angle
+
+    def draw(self):
+        arcade.draw_circle_filled(self.center_x,
+                                     self.center_y,
+                                     ENEMY_WIDTH,
+                                     ENEMY_BORDER_COLOR,
+                                     self.ang,
+                                     3
+                                  )
+        arcade.draw_circle_filled(self.center_x,
+                                  self.center_y,
+                                  ENEMY_WIDTH-5,
+                                  ENEMY_COLOR,
+                                  self.ang,
+                                  3
+                                  )
 
 class ChargerEnemy(BaseEnemyEntity):
 
