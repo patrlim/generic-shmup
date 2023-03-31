@@ -1,4 +1,5 @@
 import arcade
+import multiprocessing as mp
 from Entities import player, star, bullet, enemies, mainmenu
 from Tools import patlib
 import random
@@ -6,7 +7,6 @@ import random
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 500
 SCREEN_TITLE = "SHMUP"
-
 
 class MyGame(arcade.Window):
 
@@ -23,9 +23,17 @@ class MyGame(arcade.Window):
         self.pausebuttonarray = []
 
         self.pausebuttonarray.append(mainmenu.BaseButtonEntity(500, 300, "resume", "BUTTON_RESUME_GAME"))
-        self.pausebuttonarray.append(mainmenu.BaseButtonEntity(500, 265, "quit", "BUTTON_QUIT_GAME"))
+        self.pausebuttonarray.append(mainmenu.BaseButtonEntity(500, 265, "main menu", "BUTTON_GOTO_MENU"))
+        self.pausebuttonarray.append(mainmenu.BaseButtonEntity(500, 230, "quit to destop", "BUTTON_QUIT_GAME"))
 
-        self.pausebg = mainmenu.PauseBG(500, 275, 150, 75)
+        self.deathbuttonarray = []
+
+        self.deathbuttonarray.append(mainmenu.BaseButtonEntity(500, 150, "main menu", "BUTTON_GOTO_MENU"))
+        self.deathbuttonarray.append(mainmenu.BaseButtonEntity(500, 175, "quit to destop", "BUTTON_QUIT_GAME"))
+        self.deathbuttonarray.append(mainmenu.BaseButtonEntity(500, 200, "retry", "BUTTON_RESET_GAME"))
+
+        self.pausebg = mainmenu.PauseBG(500, 260, 150, 115)
+        self.deathbg = mainmenu.PauseBG(500, 215, 300, 180)
 
         self.ply = player.PlayerEntity(100,250)
         self.mouse_x = 100
@@ -175,37 +183,27 @@ class MyGame(arcade.Window):
                                  align="left")
 
             if self.gamestate == "lose":
+
+                self.deathbg.draw()
+
                 arcade.draw_text("You died",
                                  0,
                                  250,
-                                 arcade.color.RED,
+                                 arcade.color.WHITE,
                                  30,
-                                 1000,
-                                 align="center")
-
-                arcade.draw_text("press r to reset",
-                                 0,
-                                 225,
-                                 arcade.color.RED,
-                                 15,
-                                 1000,
-                                 align="center")
-
-                arcade.draw_text("escape to go to main menu",
-                                 0,
-                                 200,
-                                 arcade.color.RED,
-                                 15,
                                  1000,
                                  align="center")
 
                 arcade.draw_text("score: " + str(self.ply.score),
                                  0,
-                                 175,
-                                 arcade.color.RED,
+                                 225,
+                                 arcade.color.WHITE,
                                  15,
                                  1000,
                                  align="center")
+
+                for b in self.deathbuttonarray:
+                    b.draw()
 
             if self.gamestate == "pause":
                 self.pausebg.draw()
@@ -247,49 +245,8 @@ class MyGame(arcade.Window):
                 self.bulletarray.append(bullet.BulletEntity(self.ply.center_x, self.ply.center_y, 25, 0, True, 1))
                 self.shoottime = self.time + 0.1
 
-            for b in self.bulletarray:
-                b.update()
-                if patlib.distToPoint(b.center_x, b.center_y, self.ply.center_x, self.ply.center_y) < 40 and not self.ply.godmode and not b.ownedbyplayer:
-                    self.ply.health -= b.damage
-                    if self.ply.health < 0:
-                        self.ply.health = 0
-                    self.bulletarray.remove(b)
-                if b.center_x > 1100 or b.center_x < -100 or b.center_y > 600 or b.center_y < -100:
-                    self.bulletarray.remove(b)
-
-            for e in self.enemyarray:
-
-                e.update(self.ply.center_x, self.ply.center_y, self.time)
-
-                for b in self.bulletarray:
-                    if patlib.distToPoint(e.center_x, e.center_y, b.center_x, b.center_y) < 25 and b.ownedbyplayer:
-                        if not e.invincible:
-                            e.health -= b.damage
-                            if e.health <= 0:
-                                self.ply.score += e.scorevalue
-                                self.enemyarray.remove(e)
-                                break
-                            if not self.ply.piercing:
-                                self.bulletarray.remove(b)
-                        else:
-                            self.bulletarray.remove(b)
-
-                if patlib.distToPoint(e.center_x, e.center_y, self.ply.center_x, self.ply.center_y) < 40 and not self.ply.godmode:
-                    self.ply.health -= e.meleedamage
-                    if self.ply.health < 0:
-                        self.ply.health = 0
-                    self.enemyarray.remove(e)
-                    break
-
-                if e.__class__ == enemies.ShooterEnemy:
-                    if e.shoottime < self.time and len(self.bulletarray) < 30:
-                        e.shoottime = self.time + 1
-                        self.bulletarray.append(bullet.BulletEntity(e.center_x, e.center_y, -10, 0, False, 10))
-
-                if not -200 < e.center_x < 1200 or not -200 < e.center_y < 700:
-                    self.enemyarray.remove(e)
-                    break
-
+            self.updateBullets()
+            self.updateEnemies()
 
             for s in self.stararray:
                 s.update(self.ply.change_x, self.ply.change_y)
@@ -313,6 +270,54 @@ class MyGame(arcade.Window):
             if self.ply.health <= 0:
                 self.gamestate = "lose"
 
+    def updateEnemies(self):
+        for e in self.enemyarray:
+
+            e.update(self.ply.center_x, self.ply.center_y, self.time)
+
+            for b in self.bulletarray:
+                if patlib.distToPoint(e.center_x, e.center_y, b.center_x, b.center_y) < 25 and b.ownedbyplayer:
+                    if not e.invincible:
+                        e.health -= b.damage
+                        if e.health <= 0:
+                            self.ply.score += e.scorevalue
+                            self.enemyarray.remove(e)
+                            break
+                        if not self.ply.piercing:
+                            self.bulletarray.remove(b)
+                    else:
+                        self.bulletarray.remove(b)
+
+            if patlib.distToPoint(e.center_x, e.center_y, self.ply.center_x,
+                                  self.ply.center_y) < 40 and not self.ply.godmode:
+                self.ply.health -= e.meleedamage
+                if self.ply.health < 0:
+                    self.ply.health = 0
+                self.enemyarray.remove(e)
+                break
+
+            if e.__class__ == enemies.ShooterEnemy:
+                if e.shoottime < self.time and len(self.bulletarray) < 30:
+                    e.shoottime = self.time + 1
+                    self.bulletarray.append(bullet.BulletEntity(e.center_x, e.center_y, -10, 0, False, 10))
+
+            if not -200 < e.center_x < 1200 or not -200 < e.center_y < 700:
+                self.enemyarray.remove(e)
+                break
+
+
+    def updateBullets(self):
+        for b in self.bulletarray:
+            b.update()
+            if patlib.distToPoint(b.center_x, b.center_y, self.ply.center_x,
+                                  self.ply.center_y) < 40 and not self.ply.godmode and not b.ownedbyplayer:
+                self.ply.health -= b.damage
+                if self.ply.health < 0:
+                    self.ply.health = 0
+                self.bulletarray.remove(b)
+            if b.center_x > 1100 or b.center_x < -100 or b.center_y > 600 or b.center_y < -100:
+                self.bulletarray.remove(b)
+
     def on_key_press(self, key, key_modifiers):
         if key == arcade.key.R:
             self.retry()
@@ -330,6 +335,7 @@ class MyGame(arcade.Window):
             elif self.gamestate == "lose":
                 self.retry()
                 self.gamestate = "menu"
+        return 1
 
     def on_key_release(self, key, key_modifiers):
         pass
@@ -361,6 +367,23 @@ class MyGame(arcade.Window):
 
                     if b.id == "BUTTON_QUIT_GAME":
                         arcade.exit()
+
+                    if b.id == "BUTTON_GOTO_MENU":
+                        self.retry()
+                        self.gamestate = "menu"
+        if self.gamestate == "lose":
+            for b in self.deathbuttonarray:
+                if b.center_x - mainmenu.BUTTON_LENGTH / 2 < x < b.center_x + mainmenu.BUTTON_LENGTH / 2 and \
+                    b.center_y - mainmenu.BUTTON_WIDTH / 2 < y < b.center_y + mainmenu.BUTTON_WIDTH / 2:
+                    if b.id == "BUTTON_QUIT_GAME":
+                        arcade.exit()
+
+                    if b.id == "BUTTON_GOTO_MENU":
+                        self.retry()
+                        self.gamestate = "menu"
+
+                    if b.id == "BUTTON_RESET_GAME":
+                        self.retry()
 
     def on_mouse_release(self, x, y, button, key_modifiers):
         self.shooting = False

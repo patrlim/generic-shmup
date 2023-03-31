@@ -36,22 +36,15 @@ class BaseEnemyEntity:
                                      ENEMY_WIDTH,
                                      ENEMY_BORDER_COLOR,
                                      270,
-                                     3
+                                     self.health + 2
                                   )
         arcade.draw_circle_filled(self.center_x,
                                   self.center_y,
                                   ENEMY_WIDTH-5,
                                   ENEMY_COLOR,
                                   270,
-                                  3
+                                  self.health + 2
                                   )
-        arcade.draw_text(str(self.health),
-                         self.center_x - ENEMY_WIDTH * 2,
-                         self.center_y,
-                         arcade.color.PURPLE,
-                         10,
-                         100,
-                         align="center")
 
 class DummyEnemy(BaseEnemyEntity):
 
@@ -63,6 +56,7 @@ class DummyEnemy(BaseEnemyEntity):
         self.ang = ang
         self.speed = speed
         self.change_angle = turnspeed
+        self.sides = random.randint(3,5)
 
     def update(self):
         # Convert angle in degrees to radians.
@@ -81,14 +75,14 @@ class DummyEnemy(BaseEnemyEntity):
                                      ENEMY_WIDTH,
                                      ENEMY_BORDER_COLOR,
                                      self.ang,
-                                     3
+                                     self.sides
                                   )
         arcade.draw_circle_filled(self.center_x,
                                   self.center_y,
                                   ENEMY_WIDTH-5,
                                   ENEMY_COLOR,
                                   self.ang,
-                                  3
+                                  self.sides
                                   )
 
 class ChargerEnemy(BaseEnemyEntity):
@@ -106,22 +100,15 @@ class ChargerEnemy(BaseEnemyEntity):
                                      ENEMY_WIDTH,
                                      ENEMY_BORDER_COLOR,
                                      270,
-                                     3
+                                     self.health + 2
                                   )
         arcade.draw_circle_filled(self.center_x,
                                   self.center_y,
                                   ENEMY_WIDTH-5,
                                   ENEMY_COLOR,
                                   270,
-                                  3
+                                  self.health + 2
                                   )
-        arcade.draw_text(str(self.health),
-                         self.center_x - 50,
-                         self.center_y - 10,
-                         arcade.color.WHITE,
-                         20,
-                         100,
-                         align="center")
 
 class ShooterEnemy(BaseEnemyEntity):
 
@@ -150,22 +137,15 @@ class ShooterEnemy(BaseEnemyEntity):
                                       ENEMY_WIDTH,
                                       SHOOTER_ENEMY_BORDER_COLOR,
                                       270,
-                                      3
+                                      self.health + 2
                                   )
         arcade.draw_circle_filled(self.center_x,
                                       self.center_y,
                                       ENEMY_WIDTH-5,
                                       SHOOTER_ENEMY_COLOR,
                                       270,
-                                      3
+                                      self.health + 2
                                   )
-        arcade.draw_text(str(self.health),
-                         self.center_x - 50,
-                         self.center_y - 10,
-                         arcade.color.WHITE,
-                         20,
-                         100,
-                         align="center")
 
 class AsteroidEnemy(BaseEnemyEntity):
 
