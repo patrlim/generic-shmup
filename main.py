@@ -11,6 +11,12 @@ SCREEN_TITLE = "SHMUP"
 
 POWERUP_CHANCE = 10
 
+POWERUP_GODMODE_WEIGHT = 5
+POWERUP_HEALTH_WEIGHT = 100
+POWERUP_TRIPPLESHOT_WEIGHT = 30
+
+POWERUP_TOTAL_WEIGHT = 100
+
 class MyGame(arcade.Window):
 
     def __init__(self, width, height, title):
@@ -39,9 +45,10 @@ class MyGame(arcade.Window):
 
         self.pausebuttonarray = []
 
-        self.pausebuttonarray.append(mainmenu.BaseButtonEntity(500, 300, "resume", "BUTTON_RESUME_GAME"))
+        self.pausebuttonarray.append(mainmenu.BaseButtonEntity(500, 335, "resume", "BUTTON_RESUME_GAME"))
         self.pausebuttonarray.append(mainmenu.BaseButtonEntity(500, 265, "main menu", "BUTTON_GOTO_MENU"))
         self.pausebuttonarray.append(mainmenu.BaseButtonEntity(500, 230, "quit to desktop", "BUTTON_QUIT_GAME"))
+        self.pausebuttonarray.append(mainmenu.BaseButtonEntity(500, 300, "retry", "BUTTON_RESET_GAME"))
 
         self.deathbuttonarray = []
 
@@ -49,7 +56,7 @@ class MyGame(arcade.Window):
         self.deathbuttonarray.append(mainmenu.BaseButtonEntity(500, 150, "quit to desktop", "BUTTON_QUIT_GAME"))
         self.deathbuttonarray.append(mainmenu.BaseButtonEntity(500, 200, "retry", "BUTTON_RESET_GAME"))
 
-        self.pausebg = mainmenu.PauseBG(500, 260, 150, 115)
+        self.pausebg = mainmenu.PauseBG(500, 280, 150, 140)
         self.deathbg = mainmenu.PauseBG(500, 215, 300, 180)
 
         self.ply = player.PlayerEntity(100,250)
@@ -73,6 +80,7 @@ class MyGame(arcade.Window):
         self.menuenemyarray = []
         self.menustararray = []
         self.ply.godmode = False
+        self.ply.trippleshot = False
 
         self.enemyselector = 0
 
@@ -172,13 +180,14 @@ class MyGame(arcade.Window):
                 b.draw()
 
             # title text here
-            arcade.draw_text("Stellar Skirmish",
+            arcade.draw_text("Space Flight Dog Fight",
                              35,
                              350,
                              arcade.color.WHITE,
                              50,
                              1000,
-                             align="left")
+                             align="left"
+                             )
 
         if self.gamestate == "playing" or self.gamestate == "lose" or self.gamestate == "pause":
 
@@ -268,6 +277,11 @@ class MyGame(arcade.Window):
 
             if self.shooting and self.canshoot and self.time > self.shoottime:
                 self.bulletarray.append(bullet.BulletEntity(self.ply.center_x, self.ply.center_y, 25, 0, True, 1))
+
+                if self.ply.trippleshot:
+                    self.bulletarray.append(bullet.BulletEntity(self.ply.center_x, self.ply.center_y+15, 25, 0, True, 1))
+                    self.bulletarray.append(bullet.BulletEntity(self.ply.center_x, self.ply.center_y-15, 25, 0, True, 1))
+
                 self.shoottime = self.time + 0.1
                 self.shootsound.play(self.shootsoundspeed,0)
 
@@ -316,6 +330,13 @@ class MyGame(arcade.Window):
                     self.ply.godmodeexpiretime = p.powerupexpirytime
                     self.ply.health = 100
 
+                if p.powerup == "POWERUP_TRIPLESHOT":
+                    self.ply.trippleshot = True
+                    self.ply.trippleshotexpiretime = p.powerupexpirytime
+
+                self.poweruparray.remove(p)
+
+            if p.center_y > 600 or p.center_y < -100 or p.center_x > 1100 or p.center_x < -100:
                 self.poweruparray.remove(p)
 
     def updateEnemies(self):
@@ -326,16 +347,25 @@ class MyGame(arcade.Window):
             for b in self.bulletarray:
                 if patlib.distToPoint(e.center_x, e.center_y, b.center_x, b.center_y) < 25 and b.ownedbyplayer:
                     if not e.invincible:
-                        e.health -= b.damage
+
+                        if self.ply.trippleshot:
+                            e.health -= b.damage*3
+                        else:
+                            e.health -= b.damage
+
+
                         if e.health <= 0:
                             self.ply.score += e.scorevalue
                             if random.randint(0,100) < POWERUP_CHANCE:
-                                self.poweruparray.append(powerups.PowerupEntity(e.center_x, e.center_y, e.change_x, e.change_y, "POWERUP_GODMODE", self.time + 10))
-                            self.enemyarray.remove(e)
+                                self.spawnPowerup(e)
+                            if e in self.enemyarray:
+                                self.enemyarray.remove(e)
                         if not self.ply.piercing:
-                            self.bulletarray.remove(b)
+                            if b in self.bulletarray:
+                                self.bulletarray.remove(b)
                     else:
-                        self.bulletarray.remove(b)
+                        if b in self.bulletarray:
+                            self.bulletarray.remove(b)
 
             if patlib.distToPoint(e.center_x, e.center_y, self.ply.center_x, self.ply.center_y) < 40:
                 if not self.ply.godmode:
@@ -369,7 +399,24 @@ class MyGame(arcade.Window):
                     self.ply.health = 0
                 self.bulletarray.remove(b)
             if b.center_x > 1100 or b.center_x < -100 or b.center_y > 600 or b.center_y < -100:
-                self.bulletarray.remove(b)
+                if b in self.bulletarray:
+                    self.bulletarray.remove(b)
+
+    def spawnPowerup(self, e):
+        powerup_weight = random.uniform(0, POWERUP_TOTAL_WEIGHT)
+        print(powerup_weight)
+        if POWERUP_GODMODE_WEIGHT > powerup_weight:
+            print("SPAWN GODMODE")
+            self.poweruparray.append(
+                powerups.PowerupEntity(e.center_x, e.center_y, e.change_x, e.change_y, "POWERUP_GODMODE",self.time + 10))
+        elif POWERUP_TRIPPLESHOT_WEIGHT > powerup_weight:
+            print("SPAWN TRIPPLESHOT")
+            self.poweruparray.append(
+                powerups.PowerupEntity(e.center_x, e.center_y, e.change_x, e.change_y, "POWERUP_TRIPLESHOT",self.time + 10))
+        elif POWERUP_HEALTH_WEIGHT > powerup_weight:
+            print("SPAWN HEALTH")
+            self.poweruparray.append(
+                powerups.PowerupEntity(e.center_x, e.center_y, e.change_x, e.change_y, "POWERUP_HEALTH", self.time + 0))
 
     def on_key_press(self, key, key_modifiers):
         if key == arcade.key.R:
@@ -431,6 +478,9 @@ class MyGame(arcade.Window):
                     if b.id == "BUTTON_GOTO_MENU":
                         self.retry()
                         self.gamestate = "menu"
+
+                    if b.id == "BUTTON_RESET_GAME":
+                        self.retry()
 
         if self.gamestate == "lose":
             for b in self.deathbuttonarray:

@@ -122,10 +122,11 @@ class ShooterEnemy(BaseEnemyEntity):
         self.meleedamage = 0
         self.invincible = False
 
+        self.targetxoffset = random.uniform(-100,100)
         self.shoottime = 0
 
     def update(self, ply_x, ply_y,time):
-        self.change_x = -0.1 * (self.center_x - 800)
+        self.change_x = -0.1 * (self.center_x - (800 + self.targetxoffset))
         self.change_y = 0
 
         self.center_x += self.change_x

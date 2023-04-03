@@ -24,6 +24,8 @@ class PlayerEntity:
         self.score = 0
         self.godmode = False
         self.godmodeexpiretime = 0
+        self.trippleshot = False
+        self.trippleshotexpiretime = 0
 
     def update(self, mouse_x, mouse_y, time):
         # Move the rectangle
@@ -34,6 +36,9 @@ class PlayerEntity:
 
         if time > self.godmodeexpiretime:
             self.godmode = False
+
+        if time > self.trippleshotexpiretime:
+            self.trippleshot = False
 
     def draw(self):
         # Draw the rectangle
