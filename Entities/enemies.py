@@ -23,7 +23,7 @@ class BaseEnemyEntity:
         self.change_y = 0
         self.health = random.randint(1,3)
         self.scorevalue = 100
-        self.meleedamage = 10
+        self.meleedamage = 25
         self.invincible = False
 
     def update(self, ply_x, ply_y,time):

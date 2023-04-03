@@ -8,7 +8,7 @@ class StarEntity:
     def __init__(self, x):
         self.center_x = x
         self.center_y = random.randint(1,600)
-        self.depth = random.uniform(0,3)
+        self.depth = random.uniform(0.6,3)
         self.change_x = self.depth * 10 - 5
         self.width = self.depth + random.uniform(-0.5,0.5)
 

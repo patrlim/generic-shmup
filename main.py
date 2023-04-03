@@ -404,17 +404,13 @@ class MyGame(arcade.Window):
 
     def spawnPowerup(self, e):
         powerup_weight = random.uniform(0, POWERUP_TOTAL_WEIGHT)
-        print(powerup_weight)
         if POWERUP_GODMODE_WEIGHT > powerup_weight:
-            print("SPAWN GODMODE")
             self.poweruparray.append(
                 powerups.PowerupEntity(e.center_x, e.center_y, e.change_x, e.change_y, "POWERUP_GODMODE",self.time + 10))
         elif POWERUP_TRIPPLESHOT_WEIGHT > powerup_weight:
-            print("SPAWN TRIPPLESHOT")
             self.poweruparray.append(
                 powerups.PowerupEntity(e.center_x, e.center_y, e.change_x, e.change_y, "POWERUP_TRIPLESHOT",self.time + 10))
         elif POWERUP_HEALTH_WEIGHT > powerup_weight:
-            print("SPAWN HEALTH")
             self.poweruparray.append(
                 powerups.PowerupEntity(e.center_x, e.center_y, e.change_x, e.change_y, "POWERUP_HEALTH", self.time + 0))
 
