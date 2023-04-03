@@ -23,23 +23,36 @@ class PlayerEntity:
         self.piercing = False
         self.score = 0
         self.godmode = False
+        self.godmodeexpiretime = 0
 
-    def update(self, mouse_x, mouse_y):
+    def update(self, mouse_x, mouse_y, time):
         # Move the rectangle
         self.change_y = -0.1 * (self.center_y - mouse_y)
         self.change_x = -0.1 * (self.center_x - mouse_x)
         self.center_y += self.change_y
         self.center_x += self.change_x
 
+        if time > self.godmodeexpiretime:
+            self.godmode = False
+
     def draw(self):
         # Draw the rectangle
-        arcade.draw_circle_filled(self.center_x,
-                                  self.center_y,
-                                  RECT_WIDTH,
-                                  RECT_COLOR,
-                                  90,
-                                  3
-                                  )
+        if self.godmode:
+            arcade.draw_circle_filled(self.center_x,
+                                      self.center_y,
+                                      RECT_WIDTH,
+                                      arcade.color.WHITE,
+                                      90,
+                                      3
+                                      )
+        else:
+            arcade.draw_circle_filled(self.center_x,
+                                      self.center_y,
+                                      RECT_WIDTH,
+                                      RECT_COLOR,
+                                      90,
+                                      3
+                                      )
 
         arcade.draw_rectangle_filled(self.center_x,
                                      self.center_y + 25,

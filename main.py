@@ -1,6 +1,7 @@
+import time
+
 import arcade
-import multiprocessing as mp
-from Entities import player, star, bullet, enemies, mainmenu
+from Entities import player, star, bullet, enemies, mainmenu, powerups
 from Tools import patlib
 import random
 
@@ -8,12 +9,28 @@ SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 500
 SCREEN_TITLE = "SHMUP"
 
+POWERUP_CHANCE = 10
+
 class MyGame(arcade.Window):
 
     def __init__(self, width, height, title):
         super().__init__(width, height, title)
 
         arcade.set_background_color(arcade.color.BLACK)
+
+        self.shootsound = arcade.Sound('sounds/shoot.wav')
+        self.shootsoundspeed = 1
+        self.enemyshootsound = arcade.Sound('sounds/enemyshoot.wav')
+        self.enemyshootsoundspeed = 1
+        self.powerupsound = arcade.Sound('sounds/powerup.wav')
+        self.powerupsoundspeed = 1
+        self.plydeathsound = arcade.Sound('sounds/playerdeath.wav')
+        self.plydeathsoundspeed = 1
+        self.deathsoundplayed = False
+        self.buttonclicksound = arcade.Sound('sounds/click.wav')
+        self.buttonclicksoundspeed = 1
+
+        self.menuenemyang = 0
 
         self.menubuttonarray = []
 
@@ -24,12 +41,12 @@ class MyGame(arcade.Window):
 
         self.pausebuttonarray.append(mainmenu.BaseButtonEntity(500, 300, "resume", "BUTTON_RESUME_GAME"))
         self.pausebuttonarray.append(mainmenu.BaseButtonEntity(500, 265, "main menu", "BUTTON_GOTO_MENU"))
-        self.pausebuttonarray.append(mainmenu.BaseButtonEntity(500, 230, "quit to destop", "BUTTON_QUIT_GAME"))
+        self.pausebuttonarray.append(mainmenu.BaseButtonEntity(500, 230, "quit to desktop", "BUTTON_QUIT_GAME"))
 
         self.deathbuttonarray = []
 
-        self.deathbuttonarray.append(mainmenu.BaseButtonEntity(500, 150, "main menu", "BUTTON_GOTO_MENU"))
-        self.deathbuttonarray.append(mainmenu.BaseButtonEntity(500, 175, "quit to destop", "BUTTON_QUIT_GAME"))
+        self.deathbuttonarray.append(mainmenu.BaseButtonEntity(500, 175, "main menu", "BUTTON_GOTO_MENU"))
+        self.deathbuttonarray.append(mainmenu.BaseButtonEntity(500, 150, "quit to desktop", "BUTTON_QUIT_GAME"))
         self.deathbuttonarray.append(mainmenu.BaseButtonEntity(500, 200, "retry", "BUTTON_RESET_GAME"))
 
         self.pausebg = mainmenu.PauseBG(500, 260, 150, 115)
@@ -51,6 +68,7 @@ class MyGame(arcade.Window):
 
         self.bulletarray = []
         self.enemyarray = []
+        self.poweruparray = []
         self.stararray = []
         self.menuenemyarray = []
         self.menustararray = []
@@ -77,6 +95,7 @@ class MyGame(arcade.Window):
         self.gamestate = "playing"
         self.time = 1
         self.deltatime = 1
+        self.deathsoundplayed = False
 
         self.shooting = False
         self.canshoot = True
@@ -84,6 +103,7 @@ class MyGame(arcade.Window):
 
         self.bulletarray = []
         self.enemyarray = []
+        self.poweruparray = []
         self.stararray = []
         self.ply.godmode = False
 
@@ -151,8 +171,8 @@ class MyGame(arcade.Window):
             for b in self.menubuttonarray:
                 b.draw()
 
-            #title text here
-            arcade.draw_text("PLACEHOLDER TITLE",
+            # title text here
+            arcade.draw_text("Stellar Skirmish",
                              35,
                              350,
                              arcade.color.WHITE,
@@ -165,13 +185,18 @@ class MyGame(arcade.Window):
             for s in self.stararray:
                 s.draw()
 
-            self.ply.draw()
+            if self.gamestate != "lose":
+                self.ply.draw()
 
             for b in self.bulletarray:
                 b.draw()
 
+            for p in self.poweruparray:
+                p.draw()
+
             for e in self.enemyarray:
                 e.draw()
+
 
             if self.gamestate == "playing" or self.gamestate == "pause":
                 arcade.draw_text(str(self.ply.score),
@@ -228,7 +253,7 @@ class MyGame(arcade.Window):
             if 0 < self.time*100 % random.randint(1,500) < 1 and random.randint(1,10) > 7:
                 for i in range(3):
                     self.menuenemyang = random.uniform(-60,60)
-                    self.menuenemyarray.append(enemies.DummyEnemy(random.randint(200, 600), random.randint(-90, -20), self.menuenemyang, 3, 0)) #x, y, ang, col, speed, turnspeed
+                    self.menuenemyarray.append(enemies.DummyEnemy(random.randint(200, 600), random.randint(-90, -20), self.menuenemyang, 3, 0))
 
             for e in self.menuenemyarray:
                 e.update()
@@ -236,7 +261,7 @@ class MyGame(arcade.Window):
         if self.gamestate == "playing" or self.gamestate == "lose":
 
             if self.gamestate == "playing":
-                self.ply.update(self.mouse_x, self.mouse_y)
+                self.ply.update(self.mouse_x, self.mouse_y,self.time)
 
             if self.gamestate == "lose":
                 self.shooting = False
@@ -244,9 +269,11 @@ class MyGame(arcade.Window):
             if self.shooting and self.canshoot and self.time > self.shoottime:
                 self.bulletarray.append(bullet.BulletEntity(self.ply.center_x, self.ply.center_y, 25, 0, True, 1))
                 self.shoottime = self.time + 0.1
+                self.shootsound.play(self.shootsoundspeed,0)
 
             self.updateBullets()
             self.updateEnemies()
+            self.updatePowerups()
 
             for s in self.stararray:
                 s.update(self.ply.change_x, self.ply.change_y)
@@ -269,6 +296,27 @@ class MyGame(arcade.Window):
 
             if self.ply.health <= 0:
                 self.gamestate = "lose"
+                if not self.deathsoundplayed:
+                    self.plydeathsound.play(self.plydeathsoundspeed,0)
+                    self.deathsoundplayed = True
+
+    def updatePowerups(self):
+        for p in self.poweruparray:
+            p.update()
+            if patlib.distToPoint(p.center_x, p.center_y, self.ply.center_x, self.ply.center_y) < (player.RECT_WIDTH + powerups.POWERUP_WIDTH):
+                self.powerupsound.play(self.powerupsoundspeed,0)
+                if p.powerup == "POWERUP_HEALTH":
+                    if self.ply.health <= 100:
+                        self.ply.health += 10
+                        if self.ply.health > 100:
+                            self.ply.health = 100
+
+                if p.powerup == "POWERUP_GODMODE":
+                    self.ply.godmode = True
+                    self.ply.godmodeexpiretime = p.powerupexpirytime
+                    self.ply.health = 100
+
+                self.poweruparray.remove(p)
 
     def updateEnemies(self):
         for e in self.enemyarray:
@@ -281,36 +329,41 @@ class MyGame(arcade.Window):
                         e.health -= b.damage
                         if e.health <= 0:
                             self.ply.score += e.scorevalue
+                            if random.randint(0,100) < POWERUP_CHANCE:
+                                self.poweruparray.append(powerups.PowerupEntity(e.center_x, e.center_y, e.change_x, e.change_y, "POWERUP_GODMODE", self.time + 10))
                             self.enemyarray.remove(e)
-                            break
                         if not self.ply.piercing:
                             self.bulletarray.remove(b)
                     else:
                         self.bulletarray.remove(b)
 
-            if patlib.distToPoint(e.center_x, e.center_y, self.ply.center_x,
-                                  self.ply.center_y) < 40 and not self.ply.godmode:
-                self.ply.health -= e.meleedamage
-                if self.ply.health < 0:
-                    self.ply.health = 0
-                self.enemyarray.remove(e)
-                break
+            if patlib.distToPoint(e.center_x, e.center_y, self.ply.center_x, self.ply.center_y) < 40:
+                if not self.ply.godmode:
+                    self.ply.health -= e.meleedamage
+                    if self.ply.health < 0:
+                        self.ply.health = 0
+
+                if e in self.enemyarray:
+                    self.enemyarray.remove(e)
 
             if e.__class__ == enemies.ShooterEnemy:
-                if e.shoottime < self.time and len(self.bulletarray) < 30:
+                if e.center_y > 500 or e.center_y < 0:
+                    self.enemyarray.remove(e)
+                if e.shoottime < self.time and len(self.bulletarray) < 30 and e.center_x < 1000:
                     e.shoottime = self.time + 1
                     self.bulletarray.append(bullet.BulletEntity(e.center_x, e.center_y, -10, 0, False, 10))
+                    self.enemyshootsound.play(self.enemyshootsoundspeed, 0)
+
 
             if not -200 < e.center_x < 1200 or not -200 < e.center_y < 700:
                 self.enemyarray.remove(e)
-                break
 
 
     def updateBullets(self):
         for b in self.bulletarray:
             b.update()
             if patlib.distToPoint(b.center_x, b.center_y, self.ply.center_x,
-                                  self.ply.center_y) < 40 and not self.ply.godmode and not b.ownedbyplayer:
+            self.ply.center_y) < 40 and not self.ply.godmode and not b.ownedbyplayer:
                 self.ply.health -= b.damage
                 if self.ply.health < 0:
                     self.ply.health = 0
@@ -352,30 +405,42 @@ class MyGame(arcade.Window):
                 if b.center_x - mainmenu.BUTTON_LENGTH / 2 < x < b.center_x + mainmenu.BUTTON_LENGTH / 2 and \
                     b.center_y - mainmenu.BUTTON_WIDTH / 2 < y < b.center_y + mainmenu.BUTTON_WIDTH / 2:
 
+                    self.buttonclicksound.play(self.buttonclicksoundspeed,0)
+
                     if b.id == "BUTTON_START_GAME":
                         self.gamestate = "playing"
 
                     if b.id == "BUTTON_QUIT_GAME":
+                        time.sleep(0.1)
                         arcade.exit()
+
         if self.gamestate == "pause":
             for b in self.pausebuttonarray:
                 if b.center_x - mainmenu.BUTTON_LENGTH / 2 < x < b.center_x + mainmenu.BUTTON_LENGTH / 2 and \
                     b.center_y - mainmenu.BUTTON_WIDTH / 2 < y < b.center_y + mainmenu.BUTTON_WIDTH / 2:
 
+                    self.buttonclicksound.play(self.buttonclicksoundspeed,0)
+
                     if b.id == "BUTTON_RESUME_GAME":
                         self.gamestate = "playing"
 
                     if b.id == "BUTTON_QUIT_GAME":
+                        time.sleep(0.1)
                         arcade.exit()
 
                     if b.id == "BUTTON_GOTO_MENU":
                         self.retry()
                         self.gamestate = "menu"
+
         if self.gamestate == "lose":
             for b in self.deathbuttonarray:
                 if b.center_x - mainmenu.BUTTON_LENGTH / 2 < x < b.center_x + mainmenu.BUTTON_LENGTH / 2 and \
                     b.center_y - mainmenu.BUTTON_WIDTH / 2 < y < b.center_y + mainmenu.BUTTON_WIDTH / 2:
+
+                    self.buttonclicksound.play(self.buttonclicksoundspeed,0)
+
                     if b.id == "BUTTON_QUIT_GAME":
+                        time.sleep(0.1)
                         arcade.exit()
 
                     if b.id == "BUTTON_GOTO_MENU":
