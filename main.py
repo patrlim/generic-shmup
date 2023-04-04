@@ -32,6 +32,10 @@ class MyGame(arcade.Window):
         self.powerupsoundspeed = 1
         self.plydeathsound = arcade.Sound('sounds/playerdeath.wav')
         self.plydeathsoundspeed = 1
+        self.plyhurtsound = arcade.Sound('sounds/playerhurt.wav')
+        self.plyhurtsoundspeed = 1
+        self.enemydeathsound = arcade.Sound('sounds/enemydeath.wav')
+        self.enemydeathsoundspeed = 0.25
         self.deathsoundplayed = False
         self.buttonclicksound = arcade.Sound('sounds/click.wav')
         self.buttonclicksoundspeed = 1
@@ -353,13 +357,13 @@ class MyGame(arcade.Window):
                         else:
                             e.health -= b.damage
 
-
                         if e.health <= 0:
                             self.ply.score += e.scorevalue
                             if random.randint(0,100) < POWERUP_CHANCE:
                                 self.spawnPowerup(e)
                             if e in self.enemyarray:
                                 self.enemyarray.remove(e)
+                                self.enemydeathsound.play(self.enemydeathsoundspeed, 0)
                         if not self.ply.piercing:
                             if b in self.bulletarray:
                                 self.bulletarray.remove(b)
@@ -372,9 +376,12 @@ class MyGame(arcade.Window):
                     self.ply.health -= e.meleedamage
                     if self.ply.health < 0:
                         self.ply.health = 0
+                    if self.ply.health != 0:
+                        self.plyhurtsound.play(self.plydeathsoundspeed, 0)
 
                 if e in self.enemyarray:
                     self.enemyarray.remove(e)
+                    self.enemydeathsound.play(self.enemydeathsoundspeed,0)
 
             if e.__class__ == enemies.ShooterEnemy:
                 if e.center_y > 500 or e.center_y < 0:
