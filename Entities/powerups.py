@@ -1,5 +1,7 @@
 import random
 import arcade
+import main
+from Tools import patlib as pl
 
 POWERUP_WIDTH = 30
 POWERUP_BORDER_WIDTH = 5
@@ -28,100 +30,100 @@ class PowerupEntity:
         self.center_x += self.change_x
         self.center_y += self.change_y
 
-    def draw(self):
+    def draw(self, fs):
         if self.powerup == "POWERUP_HEALTH":
-            arcade.draw_rectangle_filled(self.center_x,
-                                         self.center_y,
-                                         POWERUP_WIDTH,
-                                         POWERUP_WIDTH,
+            arcade.draw_rectangle_filled(self.center_x * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                         self.center_y * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                         POWERUP_WIDTH * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                         POWERUP_WIDTH * pl.gfssf(fs,main.SCREEN_WIDTH),
                                          POWERUP_HEALTH_BORDER_COLOR
                                       )
-            arcade.draw_rectangle_filled(self.center_x,
-                                         self.center_y,
-                                         POWERUP_WIDTH - POWERUP_BORDER_WIDTH,
-                                         POWERUP_WIDTH - POWERUP_BORDER_WIDTH,
+            arcade.draw_rectangle_filled(self.center_x * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                         self.center_y * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                         (POWERUP_WIDTH - POWERUP_BORDER_WIDTH) * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                         (POWERUP_WIDTH - POWERUP_BORDER_WIDTH) * pl.gfssf(fs,main.SCREEN_WIDTH),
                                          POWERUP_HEALTH_COLOR
                                          )
-            arcade.draw_rectangle_filled(self.center_x,
-                                         self.center_y,
-                                         POWERUP_HEALTH_CROSS_WIDTH,
-                                         POWERUP_HEALTH_CROSS_HEIGHT,
+            arcade.draw_rectangle_filled(self.center_x * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                         self.center_y * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                         POWERUP_HEALTH_CROSS_WIDTH * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                         POWERUP_HEALTH_CROSS_HEIGHT * pl.gfssf(fs,main.SCREEN_WIDTH),
                                          POWERUP_HEALTH_BORDER_COLOR
                                          )
-            arcade.draw_rectangle_filled(self.center_x,
-                                         self.center_y,
-                                         POWERUP_HEALTH_CROSS_HEIGHT,
-                                         POWERUP_HEALTH_CROSS_WIDTH,
+            arcade.draw_rectangle_filled(self.center_x * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                         self.center_y * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                         POWERUP_HEALTH_CROSS_HEIGHT * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                         POWERUP_HEALTH_CROSS_WIDTH * pl.gfssf(fs,main.SCREEN_WIDTH),
                                          POWERUP_HEALTH_BORDER_COLOR
                                          )
         if self.powerup == "POWERUP_GODMODE":
-            arcade.draw_parabola_filled(self.center_x - POWERUP_WIDTH/2,
-                                         self.center_y,
-                                         self.center_x + POWERUP_WIDTH/2,
-                                         POWERUP_WIDTH*2,
+            arcade.draw_parabola_filled((self.center_x - POWERUP_WIDTH/2) * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                         self.center_y * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                        (self.center_x + POWERUP_WIDTH/2) * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                        (POWERUP_WIDTH*2) * pl.gfssf(fs,main.SCREEN_WIDTH),
                                          POWERUP_GODMODE_COLOR,
                                          180
                                       )
 
         if self.powerup == "POWERUP_TRIPLESHOT":
-            arcade.draw_parabola_filled(self.center_x - POWERUP_WIDTH / 8,
-                                        self.center_y,
-                                        self.center_x + POWERUP_WIDTH / 8,
-                                        POWERUP_WIDTH / 2,
+            arcade.draw_parabola_filled((self.center_x - POWERUP_WIDTH / 8) * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                        self.center_y * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                        (self.center_x + POWERUP_WIDTH / 8) * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                        (POWERUP_WIDTH / 2) * pl.gfssf(fs,main.SCREEN_WIDTH),
                                         POWERUP_TRIPLESHOT_COLOR,
                                         0
                                       )
-            arcade.draw_rectangle_filled(self.center_x,
-                                         self.center_y,
-                                         POWERUP_WIDTH/4,
-                                         POWERUP_WIDTH,
+            arcade.draw_rectangle_filled(self.center_x * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                         self.center_y * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                         (POWERUP_WIDTH/4) * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                         POWERUP_WIDTH * pl.gfssf(fs,main.SCREEN_WIDTH),
                                          POWERUP_TRIPLESHOT_COLOR
                                          )
 
-            arcade.draw_rectangle_filled(self.center_x,
-                                         self.center_y-10,
-                                         POWERUP_WIDTH/4,
-                                         POWERUP_WIDTH/10,
+            arcade.draw_rectangle_filled(self.center_x * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                         (self.center_y-10) * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                         (POWERUP_WIDTH/4) * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                         (POWERUP_WIDTH/10) * pl.gfssf(fs,main.SCREEN_WIDTH),
                                          POWERUP_TRIPLESHOT_ACCENT_COLOR
                                          )
-            arcade.draw_parabola_filled(self.center_x - POWERUP_WIDTH / 8 + POWERUP_TRIPLESHOT_GAP,
-                                        self.center_y,
-                                        self.center_x + POWERUP_WIDTH / 8 + POWERUP_TRIPLESHOT_GAP,
-                                        POWERUP_WIDTH / 2,
+            arcade.draw_parabola_filled((self.center_x - POWERUP_WIDTH / 8 + POWERUP_TRIPLESHOT_GAP) * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                        self.center_y * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                        (self.center_x + POWERUP_WIDTH / 8 + POWERUP_TRIPLESHOT_GAP) * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                        (POWERUP_WIDTH / 2) * pl.gfssf(fs,main.SCREEN_WIDTH),
                                         POWERUP_TRIPLESHOT_COLOR,
                                         0
                                         )
-            arcade.draw_rectangle_filled(self.center_x + POWERUP_TRIPLESHOT_GAP,
-                                         self.center_y,
-                                         POWERUP_WIDTH / 4,
-                                         POWERUP_WIDTH,
+            arcade.draw_rectangle_filled((self.center_x + POWERUP_TRIPLESHOT_GAP) * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                         self.center_y * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                         (POWERUP_WIDTH / 4) * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                         POWERUP_WIDTH * pl.gfssf(fs,main.SCREEN_WIDTH),
                                          POWERUP_TRIPLESHOT_COLOR
                                          )
 
-            arcade.draw_rectangle_filled(self.center_x + POWERUP_TRIPLESHOT_GAP,
-                                         self.center_y - 10,
-                                         POWERUP_WIDTH / 4,
-                                         POWERUP_WIDTH / 10,
+            arcade.draw_rectangle_filled((self.center_x + POWERUP_TRIPLESHOT_GAP) * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                         (self.center_y - 10) * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                         (POWERUP_WIDTH / 4) * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                         (POWERUP_WIDTH / 10) * pl.gfssf(fs,main.SCREEN_WIDTH),
                                          POWERUP_TRIPLESHOT_ACCENT_COLOR
                                          )
-            arcade.draw_parabola_filled(self.center_x - POWERUP_WIDTH / 8 - POWERUP_TRIPLESHOT_GAP,
-                                        self.center_y,
-                                        self.center_x + POWERUP_WIDTH / 8 - POWERUP_TRIPLESHOT_GAP,
-                                        POWERUP_WIDTH / 2,
+            arcade.draw_parabola_filled((self.center_x - POWERUP_WIDTH / 8 - POWERUP_TRIPLESHOT_GAP) * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                        self.center_y * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                        (self.center_x + POWERUP_WIDTH / 8 - POWERUP_TRIPLESHOT_GAP) * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                        (POWERUP_WIDTH / 2) * pl.gfssf(fs,main.SCREEN_WIDTH),
                                         POWERUP_TRIPLESHOT_COLOR,
                                         0
                                         )
-            arcade.draw_rectangle_filled(self.center_x - POWERUP_TRIPLESHOT_GAP,
-                                         self.center_y,
-                                         POWERUP_WIDTH / 4,
-                                         POWERUP_WIDTH,
+            arcade.draw_rectangle_filled((self.center_x - POWERUP_TRIPLESHOT_GAP) * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                         self.center_y * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                         (POWERUP_WIDTH / 4) * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                         POWERUP_WIDTH * pl.gfssf(fs,main.SCREEN_WIDTH),
                                          POWERUP_TRIPLESHOT_COLOR
                                          )
 
-            arcade.draw_rectangle_filled(self.center_x - POWERUP_TRIPLESHOT_GAP,
-                                         self.center_y - 10,
-                                         POWERUP_WIDTH / 4,
-                                         POWERUP_WIDTH / 10,
+            arcade.draw_rectangle_filled((self.center_x - POWERUP_TRIPLESHOT_GAP) * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                         (self.center_y - 10) * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                         (POWERUP_WIDTH / 4) * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                         (POWERUP_WIDTH / 10) * pl.gfssf(fs,main.SCREEN_WIDTH),
                                          POWERUP_TRIPLESHOT_ACCENT_COLOR
                                          )
 

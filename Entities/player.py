@@ -1,4 +1,6 @@
 import arcade
+import main
+from Tools import patlib as pl
 
 RECT_WIDTH = 15
 RECT_COLOR = arcade.color.GREEN
@@ -40,33 +42,33 @@ class PlayerEntity:
         if time > self.trippleshotexpiretime:
             self.trippleshot = False
 
-    def draw(self):
+    def draw(self,fs):
         # Draw the rectangle
         if self.godmode:
-            arcade.draw_circle_filled(self.center_x,
-                                      self.center_y,
-                                      RECT_WIDTH,
+            arcade.draw_circle_filled(self.center_x * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                      self.center_y * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                      RECT_WIDTH * pl.gfssf(fs,main.SCREEN_WIDTH),
                                       arcade.color.WHITE,
                                       90,
                                       3
                                       )
         else:
-            arcade.draw_circle_filled(self.center_x,
-                                      self.center_y,
-                                      RECT_WIDTH,
+            arcade.draw_circle_filled(self.center_x * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                      self.center_y * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                      RECT_WIDTH * pl.gfssf(fs,main.SCREEN_WIDTH),
                                       RECT_COLOR,
                                       90,
                                       3
                                       )
 
-        arcade.draw_rectangle_filled(self.center_x,
-                                     self.center_y + 25,
-                                     HEALTH_WIDTH,
-                                     HEALTH_HEIGHT,
+        arcade.draw_rectangle_filled((self.center_x) * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                     (self.center_y + 25) * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                     HEALTH_WIDTH * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                     HEALTH_HEIGHT * pl.gfssf(fs,main.SCREEN_WIDTH),
                                      HEALTH_BORDER_COLOR)
 
-        arcade.draw_rectangle_filled(self.center_x + ((HEALTH_WIDTH - HEALTH_BORDER) * self.health/200) - (HEALTH_WIDTH - HEALTH_BORDER)/2,
-                                     self.center_y + 25,
-                                     (HEALTH_WIDTH - HEALTH_BORDER) * (self.health/100),
-                                     (HEALTH_HEIGHT - HEALTH_BORDER),
+        arcade.draw_rectangle_filled((self.center_x + ((HEALTH_WIDTH - HEALTH_BORDER) * self.health/200) - (HEALTH_WIDTH - HEALTH_BORDER)/2 )* pl.gfssf(fs,main.SCREEN_WIDTH),
+                                     (self.center_y + 25) * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                     (HEALTH_WIDTH - HEALTH_BORDER) * (self.health/100) * pl.gfssf(fs,main.SCREEN_WIDTH),
+                                     (HEALTH_HEIGHT - HEALTH_BORDER) * pl.gfssf(fs,main.SCREEN_WIDTH),
                                      HEALTH_COLOR)

@@ -1,6 +1,7 @@
 import random
 import arcade
 import math
+import main
 from Tools import patlib
 
 ENEMY_WIDTH = 25
@@ -30,17 +31,17 @@ class BaseEnemyEntity:
         self.center_x += self.change_x
         self.center_y += self.change_y
 
-    def draw(self):
-        arcade.draw_circle_filled(self.center_x,
-                                     self.center_y,
-                                     ENEMY_WIDTH,
+    def draw(self,fs):
+        arcade.draw_circle_filled(self.center_x * patlib.gfssf(fs,main.SCREEN_WIDTH),
+                                     self.center_y * patlib.gfssf(fs,main.SCREEN_WIDTH),
+                                     ENEMY_WIDTH * patlib.gfssf(fs,main.SCREEN_WIDTH),
                                      ENEMY_BORDER_COLOR,
                                      270,
                                      self.health + 2
                                   )
-        arcade.draw_circle_filled(self.center_x,
-                                  self.center_y,
-                                  ENEMY_WIDTH-5,
+        arcade.draw_circle_filled(self.center_x * patlib.gfssf(fs,main.SCREEN_WIDTH),
+                                  self.center_y * patlib.gfssf(fs,main.SCREEN_WIDTH),
+                                  (ENEMY_WIDTH-5) * patlib.gfssf(fs,main.SCREEN_WIDTH),
                                   ENEMY_COLOR,
                                   270,
                                   self.health + 2
@@ -69,17 +70,17 @@ class DummyEnemy(BaseEnemyEntity):
         # Rotate the ship
         self.ang += self.change_angle
 
-    def draw(self):
-        arcade.draw_circle_filled(self.center_x,
-                                     self.center_y,
-                                     ENEMY_WIDTH,
+    def draw(self,fs):
+        arcade.draw_circle_filled(self.center_x * patlib.gfssf(fs,main.SCREEN_WIDTH),
+                                     self.center_y * patlib.gfssf(fs,main.SCREEN_WIDTH),
+                                     ENEMY_WIDTH * patlib.gfssf(fs,main.SCREEN_WIDTH),
                                      ENEMY_BORDER_COLOR,
                                      self.ang,
                                      self.sides
                                   )
-        arcade.draw_circle_filled(self.center_x,
-                                  self.center_y,
-                                  ENEMY_WIDTH-5,
+        arcade.draw_circle_filled(self.center_x * patlib.gfssf(fs,main.SCREEN_WIDTH),
+                                  self.center_y * patlib.gfssf(fs,main.SCREEN_WIDTH),
+                                  (ENEMY_WIDTH-5) * patlib.gfssf(fs,main.SCREEN_WIDTH),
                                   ENEMY_COLOR,
                                   self.ang,
                                   self.sides
@@ -94,17 +95,17 @@ class ChargerEnemy(BaseEnemyEntity):
         self.center_x += self.change_x
         self.center_y += self.change_y
 
-    def draw(self):
-        arcade.draw_circle_filled(self.center_x,
-                                     self.center_y,
-                                     ENEMY_WIDTH,
+    def draw(self,fs):
+        arcade.draw_circle_filled(self.center_x * patlib.gfssf(fs,main.SCREEN_WIDTH),
+                                     self.center_y * patlib.gfssf(fs,main.SCREEN_WIDTH),
+                                     ENEMY_WIDTH * patlib.gfssf(fs,main.SCREEN_WIDTH),
                                      ENEMY_BORDER_COLOR,
                                      270,
                                      self.health + 2
                                   )
-        arcade.draw_circle_filled(self.center_x,
-                                  self.center_y,
-                                  ENEMY_WIDTH-5,
+        arcade.draw_circle_filled(self.center_x * patlib.gfssf(fs,main.SCREEN_WIDTH),
+                                  self.center_y * patlib.gfssf(fs,main.SCREEN_WIDTH),
+                                  (ENEMY_WIDTH-5) * patlib.gfssf(fs,main.SCREEN_WIDTH),
                                   ENEMY_COLOR,
                                   270,
                                   self.health + 2
@@ -132,17 +133,17 @@ class ShooterEnemy(BaseEnemyEntity):
         self.center_x += self.change_x
         self.center_y += self.change_y
 
-    def draw(self):
-        arcade.draw_circle_filled(self.center_x,
-                                      self.center_y,
-                                      ENEMY_WIDTH,
+    def draw(self,fs):
+        arcade.draw_circle_filled(self.center_x * patlib.gfssf(fs,main.SCREEN_WIDTH),
+                                      self.center_y * patlib.gfssf(fs,main.SCREEN_WIDTH),
+                                      ENEMY_WIDTH * patlib.gfssf(fs,main.SCREEN_WIDTH),
                                       SHOOTER_ENEMY_BORDER_COLOR,
                                       270,
                                       self.health + 2
                                   )
-        arcade.draw_circle_filled(self.center_x,
-                                      self.center_y,
-                                      ENEMY_WIDTH-5,
+        arcade.draw_circle_filled(self.center_x * patlib.gfssf(fs,main.SCREEN_WIDTH),
+                                      self.center_y * patlib.gfssf(fs,main.SCREEN_WIDTH),
+                                      (ENEMY_WIDTH-5) * patlib.gfssf(fs,main.SCREEN_WIDTH),
                                       SHOOTER_ENEMY_COLOR,
                                       270,
                                       self.health + 2
@@ -166,10 +167,10 @@ class AsteroidEnemy(BaseEnemyEntity):
         self.center_y += self.change_y
         self.rotation += (self.change_x + self.change_y) / 5
 
-    def draw(self):
-        arcade.draw_circle_filled(self.center_x,
-                                     self.center_y,
-                                     ENEMY_WIDTH,
+    def draw(self,fs):
+        arcade.draw_circle_filled(self.center_x * patlib.gfssf(fs,main.SCREEN_WIDTH),
+                                     self.center_y * patlib.gfssf(fs,main.SCREEN_WIDTH),
+                                     ENEMY_WIDTH * patlib.gfssf(fs,main.SCREEN_WIDTH),
                                      ASTEROID_ENEMY_COLOR,
                                      self.rotation,
                                      6
